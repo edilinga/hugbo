@@ -1,6 +1,7 @@
 package com.team.gym.controller;
 
 import com.team.gym.dto.BookingResponse;
+import com.team.gym.service.BookingService;
 import com.team.gym.errors.Unauthorized;
 import com.team.gym.repository.BookingRepository;
 import jakarta.servlet.http.HttpSession;
@@ -12,8 +13,24 @@ import java.util.List;
 @RequestMapping
 public class BookingController {
     private final BookingRepository bookings;
-    public BookingController(BookingRepository bookings) { this.bookings = bookings; }
 
+    private final BookingService bookingService;
+    public BookingController(BookingRepository bookings, BookingService bookingService) {
+        this.bookings = bookings;
+        this.bookingService = bookingService;
+    }
+
+    // UC1 - bóka tíma
+    @PostMapping("/bookings/{classId}")
+    public BookingResponse book(@PathVariable Long classId, HttpSession session) {
+        return bookingService.book(classId, session);
+    }
+
+    // UC2 — afbóka tíma
+    @DeleteMapping("/bookings/{classId}")
+    public void cancel(@PathVariable Long classId, HttpSession session) {
+        bookingService.cancel(classId, session);
+    }
     //UC5: mínar bókanir
     @GetMapping("/minar-bokanir")
     public List<BookingResponse> myBookings(HttpSession session) {
@@ -29,4 +46,7 @@ public class BookingController {
             b.getClassSession().getEndAt()
         )).toList();
     }
+
+
+
 }

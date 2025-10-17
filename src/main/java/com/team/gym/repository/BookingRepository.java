@@ -7,4 +7,7 @@ import java.util.List;
 public interface BookingRepository extends JpaRepository<Booking, Long> {
     long countByClassSessionId(Long classSessionId);
     List<Booking> findByUserIdOrderByClassSessionStartAtAsc(Long userId);
+
+    boolean existsByUserIdAndClassSessionId(Long userId, Long classSessionId);
+
 }
