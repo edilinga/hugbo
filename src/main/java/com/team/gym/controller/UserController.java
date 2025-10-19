@@ -44,4 +44,20 @@ public class UserController {
         User u = users.get(uid);
         return new UserResponse(u.getId(), u.getSsn(), u.getEmail());
     }
+
+    /**
+     * Uppfærir upplýsingar um innskráðan notanda
+     *
+     * @param req     Breiðni sem inniheldur kennitölu, tölvupóst og lykilorð.
+     * @param session Núverandi HTTP session notað til að auðkenna innskráðan notanda.
+     * @return {@link UserResponse} hlutur með uppfærðum upplýsingum um notanda.
+     * @throws Unauthorized ef enginn notandi er skráður inn eða session er ekki gilt.
+     */
+    @PutMapping("/me")
+    public UserResponse updateUser(@RequestBody @Valid BreytaNotandaRequest req, HttpSession session) {
+        Long uid = (Long) session.getAttribute("uid");
+        if (uid == null) throw new Unauthorized();
+        User updated = users.updateUser(uid, req);
+        return new UserResponse(updated.getId(), updated.getSsn(), updated.getEmail());
+    }
 }
