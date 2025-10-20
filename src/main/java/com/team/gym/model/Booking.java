@@ -19,13 +19,29 @@ public class Booking {
 
     @Column(nullable=false) private Instant createdAt = Instant.now();
 
+    //edil
+
+    @Enumerated(EnumType.STRING)
+    @Column(nullable = false)
+    private BookingStatus status = BookingStatus.CONFIRMED;
+
+    private Instant cancelledAt;
+
+    //
+
     public Long getId() { return id; }
     public User getUser() { return user; }
     public ClassSession getClassSession() { return classSession; }
     public Instant getCreatedAt() { return createdAt; }
 
+    public BookingStatus getStatus() { return status; }
+    public Instant getCancelledAt() { return cancelledAt; }
+
     public void setId(long id) { this.id = id; }
     public void setUser(User user) { this.user = user; }
     public void setClassSession(ClassSession classSession) { this.classSession = classSession; }
     public void setCreatedAt(Instant createdAt) { this.createdAt = createdAt; }
+
+    public void setStatus(BookingStatus status) { this.status = status; }
+    public void setCancelledAt(Instant cancelledAt) { this.cancelledAt = cancelledAt; }
 }
