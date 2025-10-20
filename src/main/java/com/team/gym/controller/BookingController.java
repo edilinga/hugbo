@@ -6,7 +6,7 @@ import com.team.gym.errors.Unauthorized;
 import com.team.gym.repository.BookingRepository;
 import jakarta.servlet.http.HttpSession;
 import org.springframework.web.bind.annotation.*;
-
+import org.springframework.http.ResponseEntity;
 import java.util.List;
 
 @RestController
@@ -28,8 +28,11 @@ public class BookingController {
 
     // UC2 — afbóka tíma
     @DeleteMapping("/bookings/{classId}")
-    public void cancel(@PathVariable Long classId, HttpSession session) {
-        bookingService.cancel(classId, session);
+    public ResponseEntity<Void> cancel(@PathVariable Long classId, HttpSession session) {
+        Long uid = (Long) session.getAttribute("uid");
+        if (uid == null) throw new Unauthorized();
+        bookingService.cancel(uid, classId);
+        return ResponseEntity.noContent().build(); // 204
     }
     //UC5: mínar bókanir
     @GetMapping("/minar-bokanir")
@@ -46,7 +49,4 @@ public class BookingController {
             b.getClassSession().getEndAt()
         )).toList();
     }
-
-
-
 }

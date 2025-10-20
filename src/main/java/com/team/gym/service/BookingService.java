@@ -11,10 +11,12 @@ import com.team.gym.repository.UserRepository;
 import jakarta.servlet.http.HttpSession;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
-
+import java.time.Duration;
 import java.time.Instant;
 import java.util.List;
-
+import org.springframework.web.server.ResponseStatusException;
+import org.springframework.http.HttpStatus;
+import com.team.gym.model.BookingStatus;
 @Service
 public class BookingService {
 
@@ -41,35 +43,36 @@ public class BookingService {
         Long uid = requireUid(session);
 
         ClassSession cs = classRepo.findById(classId)
-                .orElseThrow(() -> new IllegalArgumentException("not_found"));
+                .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "class_not_found"));
 
-        // 1) already booked the same class?
         if (bookingRepo.existsByUserIdAndClassSessionId(uid, classId)) {
-            throw new IllegalStateException("already_booked");
+            throw new ResponseStatusException(HttpStatus.CONFLICT, "already_booked");
         }
 
-        // 2) capacity check
         long taken = bookingRepo.countByClassSessionId(classId);
         if (taken >= cs.getCapacity()) {
-            throw new IllegalStateException("class_full");
+            throw new ResponseStatusException(HttpStatus.CONFLICT, "class_full");
         }
 
-        // 3) time conflict with any existing booking of this user (overlap)
+        // time overlap
         List<Booking> mine = bookingRepo.findByUserIdOrderByClassSessionStartAtAsc(uid);
-        Instant start = cs.getStartAt();
-        Instant end   = cs.getEndAt();
+        Instant start = cs.getStartAt(), end = cs.getEndAt();
         boolean conflict = mine.stream().anyMatch(b ->
                 b.getClassSession().getStartAt().isBefore(end) &&
-                        b.getClassSession().getEndAt().isAfter(start));
+                        b.getClassSession().getEndAt().isAfter(start)
+        );
         if (conflict) {
-            throw new IllegalStateException("time_conflict");
+            throw new ResponseStatusException(HttpStatus.CONFLICT, "time_conflict");
         }
 
-        // 4) create booking
-        User user = userRepo.findById(uid).orElseThrow(() -> new IllegalArgumentException("not_found"));
+        User user = userRepo.findById(uid)
+                .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "user_not_found"));
+
         Booking b = new Booking();
         b.setUser(user);
         b.setClassSession(cs);
+
+        b.setStatus(BookingStatus.CONFIRMED);
         Booking saved = bookingRepo.save(b);
 
         return new BookingResponse(
@@ -82,15 +85,19 @@ public class BookingService {
     }
 
     @Transactional
-    public void cancel(Long classId, HttpSession session) {
-        Long uid = requireUid(session);
-        // find the specific booking of this user for this class
-        List<Booking> mine = bookingRepo.findByUserIdOrderByClassSessionStartAtAsc(uid);
-        Booking toDelete = mine.stream()
-                .filter(b -> b.getClassSession().getId().equals(classId))
-                .findFirst()
-                .orElseThrow(() -> new IllegalArgumentException("not_found")); // no booking found
+    public void cancel(Long userId, Long classId) {
+        ClassSession cs = classRepo.findById(classId)
+                .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "class_not_found"));
 
-        bookingRepo.delete(toDelete);
+        // 2-hour cutoff (keep if needed)
+        Instant now = Instant.now();
+        if (cs.getStartAt() != null && now.isAfter(cs.getStartAt().minus(Duration.ofHours(2)))) {
+            throw new ResponseStatusException(HttpStatus.CONFLICT, "too_late_to_cancel");
+        }
+
+        long deleted = bookingRepo.deleteByUserIdAndClassSessionId(userId, classId);
+        if (deleted == 0) {
+            throw new ResponseStatusException(HttpStatus.NOT_FOUND, "not_found");
+        }
     }
 }
