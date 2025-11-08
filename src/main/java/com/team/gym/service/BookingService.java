@@ -49,7 +49,7 @@ public class BookingService {
             throw new ResponseStatusException(HttpStatus.CONFLICT, "already_booked");
         }
 
-        long taken = bookingRepo.countByClassSessionId(classId);
+        long taken = bookingRepo.countByClassSessionIdAndStatus(classId, BookingStatus.CONFIRMED);
         if (taken >= cs.getCapacity()) {
             throw new ResponseStatusException(HttpStatus.CONFLICT, "class_full");
         }

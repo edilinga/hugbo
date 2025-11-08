@@ -4,6 +4,7 @@ import com.team.gym.dto.ClassSessionResponse;
 import com.team.gym.repository.BookingRepository;
 import com.team.gym.repository.ClassSessionRepository;
 import org.springframework.web.bind.annotation.*;
+import com.team.gym.model.BookingStatus;
 
 import java.util.List;
 
@@ -21,7 +22,7 @@ public class TimeTableController {
     @GetMapping("/timetable")
     public List<ClassSessionResponse> timetable() {
         return classes.findAllByOrderByStartAtAsc().stream().map(cs ->{
-            long taken = bookings.countByClassSessionId(cs.getId());
+            long taken = bookings.countByClassSessionIdAndStatus(cs.getId(), BookingStatus.CONFIRMED);
             int free = Math.max(0, cs.getCapacity() - (int)taken);
             return new ClassSessionResponse(
                 cs.getId(), cs.getType(), cs.getTeacher(),
