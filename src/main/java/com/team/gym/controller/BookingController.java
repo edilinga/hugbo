@@ -53,9 +53,8 @@ public class BookingController {
     // UC3 - Skrá á biðlista
     @PostMapping("/bookings/{classId}/waitlist")
     public BookingResponse joinWaitlist(@PathVariable Long classId, HttpSession session) {
-        Long uid = (Long) session.getAttribute("uid");
-        if (uid == null) throw new Unauthorized();
-        return bookingService.joinWaitlist(uid, classId);
+        return bookingService.joinWaitlist(classId, session);
     }
+
 
 }
