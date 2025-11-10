@@ -179,6 +179,19 @@ public class BookingService {
         promoteFromWaitlistIfSeatFree(cs);
     }
 
+    @Transactional
+    public void deleteOwned(Long uid, Long bookingId) {
+        Booking b = bookingRepo.findById(bookingId)
+            .orElseThrow(() -> new org.springframework.web.server.ResponseStatusException(
+                org.springframework.http.HttpStatus.NOT_FOUND, "not_found"));
+
+        if (!b.getUser().getId().equals(uid)) {
+            throw new org.springframework.web.server.ResponseStatusException(
+                org.springframework.http.HttpStatus.FORBIDDEN, "forbidden");
+        }
+        bookingRepo.deleteById(bookingId);
+    }
+
     /**
      * Færir af biðlista í tíma
      *

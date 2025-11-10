@@ -55,6 +55,14 @@ public class BookingController {
         return ResponseEntity.noContent().build();
     }
 
+    @DeleteMapping("/bookings/id/{bookingId}")
+    public ResponseEntity<Void> deleteById(@PathVariable Long bookingId, HttpSession session) {
+        Long uid = (Long) session.getAttribute("uid");
+        if (uid == null) throw new Unauthorized();
+        bookingService.deleteOwned(uid, bookingId);
+        return ResponseEntity.noContent().build(); // 204
+    }
+
     /**
      * //UC5: mínar bókanir
      *
