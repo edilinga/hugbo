@@ -6,13 +6,18 @@ import com.team.gym.model.User;
 import com.team.gym.repository.UserRepository;
 import org.springframework.stereotype.Service;
 
+import org.springframework.transaction.annotation.Transactional;
+import org.springframework.web.server.ResponseStatusException;
+import org.springframework.http.HttpStatus;
+import com.team.gym.repository.BookingRepository;
 
 @Service
 public class UserService {
     private final UserRepository repo;
+    private final BookingRepository bookings;
 
-    public UserService(UserRepository repo){
-        this.repo = repo;
+    public UserService(UserRepository repo, BookingRepository bookings){
+        this.repo = repo; this.bookings = bookings;
     }
 
     public User register(NyskraningRequest req){
@@ -63,4 +68,19 @@ public class UserService {
         u.setPassword(req.password());
         return repo.save(u);
     }
+
+    @Transactional
+    public void deleteAccount(Long userId) {
+        // Ensure user exists (optional but nice)
+        if (!repo.existsById(userId)) {
+            throw new ResponseStatusException(HttpStatus.NOT_FOUND, "user_not_found");
+        }
+
+        // 1) Delete all bookings for this user
+        bookings.deleteByUserId(userId);
+
+        // 2) Delete the user record
+        repo.deleteById(userId);
+    }
+
 }

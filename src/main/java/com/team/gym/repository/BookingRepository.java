@@ -22,4 +22,6 @@ public interface BookingRepository extends JpaRepository<Booking, Long> {
 
     long deleteByUserIdAndClassSessionId(Long userId, Long classSessionId);
 
+    long deleteByUserId(Long userId);
+
 }

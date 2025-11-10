@@ -7,6 +7,7 @@ import com.team.gym.service.UserService;
 import jakarta.servlet.http.HttpSession;
 import jakarta.validation.Valid;
 import org.springframework.web.bind.annotation.*;
+import org.springframework.http.ResponseEntity;
 
 @RestController
 @RequestMapping
@@ -60,4 +61,16 @@ public class UserController {
         User updated = users.updateUser(uid, req);
         return new UserResponse(updated.getId(), updated.getSsn(), updated.getEmail());
     }
+
+    @DeleteMapping("/me")
+    public ResponseEntity<Void> deleteMe(HttpSession session) {
+        Long uid = (Long) session.getAttribute("uid");
+        if (uid == null) throw new Unauthorized();
+
+        users.deleteAccount(uid);   // new service method
+        session.invalidate();       // user is logged out
+
+        return ResponseEntity.noContent().build(); // 204
+    }
+
 }
