@@ -20,6 +20,13 @@ public class UserService {
         this.repo = repo; this.bookings = bookings;
     }
 
+    /**
+     * Stofnar aðgang fyrir notanda
+     *
+     * @param req requesta fyrir nýskráningu sem inniheldur SSN, email, og lykilorð
+     * @return nýjum vistuðum {@link User} notanda
+     * @throws IllegalArgumentException ef email eða SSN er nú þegar bundið öðrum notanda
+     */
     public User register(NyskraningRequest req){
         String email = req.email().toLowerCase();
         if(repo.existsByEmail(email)) throw new IllegalArgumentException("email_taken");
@@ -32,6 +39,14 @@ public class UserService {
         return repo.save(u);
     }
 
+    /**
+     * Auðkennir notanda sem hyggst skrá sig inn
+     *
+     * @param email tölvupóstfang notanda
+     * @param password lykilorð notanda
+     * @return hlekkur {@link User} fyrir auðkenndan notanda
+     * @throws IllegalArgumentException ef email og lykilorð stemma ekki
+     */
     public User authenticate(String email, String password){
         var u = repo.findByEmail(email.toLowerCase())
             .orElseThrow(() -> new IllegalArgumentException("invalid_credentials"));
@@ -69,17 +84,20 @@ public class UserService {
         return repo.save(u);
     }
 
+    /**
+     * Eyðir aðgangi notanda
+     *
+     * @param userId auðkenni notanda sem á að eyða
+     * @throws ResponseStatusException með status 404 ef notandi er ekki til
+     */
     @Transactional
     public void deleteAccount(Long userId) {
-        // Ensure user exists (optional but nice)
         if (!repo.existsById(userId)) {
             throw new ResponseStatusException(HttpStatus.NOT_FOUND, "user_not_found");
         }
 
-        // 1) Delete all bookings for this user
         bookings.deleteByUserId(userId);
 
-        // 2) Delete the user record
         repo.deleteById(userId);
     }
 

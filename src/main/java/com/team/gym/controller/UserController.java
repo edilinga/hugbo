@@ -16,14 +16,26 @@ public class UserController {
 
     public UserController(UserService users){ this.users = users; }
 
-    //POST /auth/register -> búa til nýjan notanda
+    /**
+     * POST /auth/register -> búa til nýjan notanda
+     *
+     * @param req hlekkur {@link NyskraningRequest} sem inniheldur upplýsingar um innskráningu notanda
+     * @return hlekkur {@link UserResponse} sem innheldur ID, SSN, og email nýskráðs notanda
+     */
     @PostMapping("/auth/register")
     public UserResponse register(@RequestBody @Valid NyskraningRequest req){
         User u = users.register(req);
         return new UserResponse(u.getId(), u.getSsn(), u.getEmail());
     }
 
-    //POST /auth/login -> býr til JSESSIONID köku fyrir session
+    /**
+     * POST /auth/login -> býr til JSESSIONID köku fyrir session
+     *
+     * @param req hlekkur {@link InnskraningRequest} sem inniheldur email og lykilorð notanda sem hyggst skrá sig inn
+     * @param session núverandi hlekkur {@link HttpSession} notaður til að auðkenna notanda
+     * @return hlekkur {@link UserResponse} sem inniheldur ID, SSN, og email auðkennds notanda
+     * @throws Unauthorized ef auðkenni stemma ekki
+     */
     @PostMapping("/auth/login")
     public UserResponse login(@RequestBody @Valid InnskraningRequest req, HttpSession session){
         User u = users.authenticate(req.email(), req.password());
@@ -31,13 +43,23 @@ public class UserController {
         return new UserResponse(u.getId(), u.getSsn(), u.getEmail());
     }
 
-    //POST /auth/logout -> invaliderar sessionið svo notandi teljist skráður út
+    /**
+     * POST /auth/logout -> invaliderar sessionið svo notandi teljist skráður út
+     *
+     * @param session núverandi {@link HttpSession} bundið við innskráðan notanda
+     */
     @PostMapping("/auth/logout")
     public void logout(HttpSession session){
         session.invalidate();
     }
 
-    //GET /me -> innskráður notanda session
+    /**
+     * GET /me -> innskráður notanda session
+     *
+     * @param session núverandi {@link HttpSession} bundið við innskráðan notanda
+     * @return hlekkur {@link UserResponse} sem inniheldur ID, SSN, og email auðkennds notanda
+     * @throws Unauthorized ef enginn notandi er innskráður eða session stemmir ekki
+     */
     @GetMapping("/me")
     public UserResponse me(HttpSession session){
         Long uid = (Long) session.getAttribute("uid");
@@ -47,7 +69,7 @@ public class UserController {
     }
 
     /**
-     * Uppfærir upplýsingar um innskráðan notanda
+     * UC8 - Uppfæra upplýsingar notanda
      *
      * @param req     Breiðni sem inniheldur kennitölu, tölvupóst og lykilorð.
      * @param session Núverandi HTTP session notað til að auðkenna innskráðan notanda.
@@ -62,15 +84,22 @@ public class UserController {
         return new UserResponse(updated.getId(), updated.getSsn(), updated.getEmail());
     }
 
+    /**
+     * UC9 - Eyða aðgangi notanda
+     *
+     * @param session núverandi session sem inniheldur auðkenni notanda
+     * @return hlekkur {@link ResponseEntity} með HTTP status 204 (No Content) ef tókst að eyða aðgangi
+     * @throws Unauthorized ef enginn notandi er innskráður
+     */
     @DeleteMapping("/me")
     public ResponseEntity<Void> deleteMe(HttpSession session) {
         Long uid = (Long) session.getAttribute("uid");
         if (uid == null) throw new Unauthorized();
 
-        users.deleteAccount(uid);   // new service method
-        session.invalidate();       // user is logged out
+        users.deleteAccount(uid);
+        session.invalidate();
 
-        return ResponseEntity.noContent().build(); // 204
+        return ResponseEntity.noContent().build();
     }
 
 }

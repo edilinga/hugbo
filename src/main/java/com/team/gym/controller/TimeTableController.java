@@ -19,6 +19,12 @@ public class TimeTableController {
         this.classes = classes; this.bookings = bookings;
     }
 
+    /**
+     * Sér um GET requestu til að sækja tímatöflu.
+     *
+     * @return listi af {@link ClassSessionResponse} hlutum sem tákna alla tíma sem hægt er að bóka,
+     *         raðað eftir upphafstíma í vaxandi röð.
+     */
     @GetMapping("/timetable")
     public List<ClassSessionResponse> timetable() {
         return classes.findAllByOrderByStartAtAsc().stream().map(cs ->{

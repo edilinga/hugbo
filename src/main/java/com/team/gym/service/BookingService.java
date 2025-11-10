@@ -31,13 +31,28 @@ public class BookingService {
         this.userRepo = userRepo;
     }
 
+    /**
+     * Sækir auðkennisnúmer notanda úr núverandi session
+     *
+     * @param session núverandi HTTP session
+     * @return auðkenni notanda sem geymt er í session
+     * @throws Unauthorized ef ekkert auðkenni finnst í session
+     */
     private Long requireUid(HttpSession session) {
         Long uid = (Long) session.getAttribute("uid");
         if (uid == null) throw new Unauthorized();
         return uid;
     }
 
-    // UC1 - bóka tíma (staðfest bókun, ekki biðlisti)
+    /**
+     * UC1 - bóka tíma (staðfest bókun, ekki biðlisti)
+     *
+     * @param classId auðkenni tíma sem á að bóka
+     * @param session núverandi HTTP session sem inniheldur innskráðan notanda
+     * @return hlekkur {@link BookingResponse} sem innheldur upplýsingar um bókun
+     * @throws ResponseStatusException með status 404 ef tími eða notandi finnst ekki
+     * @throws ResponseStatusException með status 409 ef notandi hefur nú þegar bókað, tíminn er fullur, eða tími stangast á
+     */
     @Transactional
     public BookingResponse book(Long classId, HttpSession session) {
         Long uid = requireUid(session);
@@ -87,7 +102,15 @@ public class BookingService {
         );
     }
 
-    // UC3 - Skrá á biðlista
+    /**
+     * UC3 - Skrá á biðlista
+     *
+     * @param classId auðkenni tíma sem á að skrá á biðlista fyrir
+     * @param session núverandi HTTP session sem inniheldur innskráðan notanda
+     * @return hlekkur {@link BookingResponse} sem inniheldur upplýsingar um biðlista
+     * @throws ResponseStatusException með status 404 ef tími eða notandi finnst ekki
+     * @throws ResponseStatusException með status 409 ef notandi hefur nú þegar bókað eða tíminn er ekki fullur
+     */
     @Transactional
     public BookingResponse joinWaitlist(Long classId, HttpSession session) {
         Long uid = requireUid(session);
@@ -125,7 +148,14 @@ public class BookingService {
         );
     }
 
-    // UC2 - afbóka tíma (og hækka af biðlista ef sæti losnar)
+    /**
+     * UC2 - afbóka tíma (og hækka af biðlista ef sæti losnar)
+     *
+     * @param userId auðkenni notanda sem ætlar sér að afbóka
+     * @param classId auðkenni tímans sem notandi ætlar sér að afbóka
+     * @throws ResponseStatusException með status 404 ef engin bókun á gefnum tíma finnst fyrir gefin notanda
+     * @throws ResponseStatusException með status 409 ef það er of seint að afbóka
+     */
     @Transactional
     public void cancel(Long userId, Long classId) {
         Booking booking = bookingRepo.findByUserIdAndClassSessionId(userId, classId)
@@ -149,6 +179,11 @@ public class BookingService {
         promoteFromWaitlistIfSeatFree(cs);
     }
 
+    /**
+     * Færir af biðlista í tíma
+     *
+     * @param cs tími sem athuga skal hvort sé tómur og þá flytja af biðlista í tíma
+     */
     private void promoteFromWaitlistIfSeatFree(ClassSession cs) {
         long confirmed = bookingRepo.countByClassSessionIdAndStatus(cs.getId(), BookingStatus.CONFIRMED);
         if (confirmed >= cs.getCapacity()) {
