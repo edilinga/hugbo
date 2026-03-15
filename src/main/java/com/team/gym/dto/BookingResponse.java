@@ -1,5 +1,7 @@
 package com.team.gym.dto;
 
+import com.team.gym.model.BookingStatus;
+
 import java.time.Instant;
 
 public record BookingResponse(
@@ -7,5 +9,6 @@ public record BookingResponse(
     Long classSessionId,
     String type,
     Instant startAt,
-    Instant endAt
+    Instant endAt,
+    BookingStatus status
 ) {}
