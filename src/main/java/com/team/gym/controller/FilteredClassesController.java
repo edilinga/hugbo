@@ -67,8 +67,20 @@ public class FilteredClassesController {
         } else {
             int d = (days == null) ? 7 : days;
             if (d < 1 || d > 365) throw new IllegalArgumentException("bad_days");
-            fromInst = now;
-            toInst = now.plus(Duration.ofDays(d));
+
+            if (d == 7) {
+                fromInst = now;
+                toInst = now.plus(Duration.ofDays(7));
+            } else if (d == 14) {
+                fromInst = now.plus(Duration.ofDays(7));
+                toInst = now.plus(Duration.ofDays(14));
+            } else if (d == 21) {
+                fromInst = now.plus(Duration.ofDays(14));
+                toInst = now.plus(Duration.ofDays(21));
+            } else {
+                fromInst = now;
+                toInst = now.plus(Duration.ofDays(d));
+            }
         }
         if (!toInst.isAfter(fromInst)) throw new IllegalArgumentException("bad_range");
 
