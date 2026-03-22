@@ -82,7 +82,8 @@ public class BookingController {
             b.getClassSession().getId(),
             b.getClassSession().getType(),
             b.getClassSession().getStartAt(),
-            b.getClassSession().getEndAt()
+            b.getClassSession().getEndAt(),
+            b.getStatus()
         )).toList();
     }
 
