@@ -98,7 +98,8 @@ public class BookingService {
                 cs.getId(),
                 cs.getType(),
                 cs.getStartAt(),
-                cs.getEndAt()
+                cs.getEndAt(),
+                saved.getStatus()
         );
     }
 
@@ -144,7 +145,8 @@ public class BookingService {
                 cs.getId(),
                 cs.getType(),
                 cs.getStartAt(),
-                cs.getEndAt()
+                cs.getEndAt(),
+                saved.getStatus()
         );
     }
 
