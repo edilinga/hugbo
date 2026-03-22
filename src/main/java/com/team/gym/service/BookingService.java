@@ -40,7 +40,8 @@ public class BookingService {
      */
     private Long requireUid(HttpSession session) {
         Long uid = (Long) session.getAttribute("uid");
-        if (uid == null) throw new Unauthorized();
+        if (uid == null)
+            throw new Unauthorized();
         return uid;
     }
 
@@ -50,8 +51,10 @@ public class BookingService {
      * @param classId auðkenni tíma sem á að bóka
      * @param session núverandi HTTP session sem inniheldur innskráðan notanda
      * @return hlekkur {@link BookingResponse} sem innheldur upplýsingar um bókun
-     * @throws ResponseStatusException með status 404 ef tími eða notandi finnst ekki
-     * @throws ResponseStatusException með status 409 ef notandi hefur nú þegar bókað, tíminn er fullur, eða tími stangast á
+     * @throws ResponseStatusException með status 404 ef tími eða notandi finnst
+     *                                 ekki
+     * @throws ResponseStatusException með status 409 ef notandi hefur nú þegar
+     *                                 bókað, tíminn er fullur, eða tími stangast á
      */
     @Transactional
     public BookingResponse book(Long classId, HttpSession session) {
@@ -75,10 +78,8 @@ public class BookingService {
         Instant start = cs.getStartAt(), end = cs.getEndAt();
         boolean conflict = mine.stream()
                 .filter(b -> b.getStatus() == BookingStatus.CONFIRMED)
-                .anyMatch(b ->
-                        b.getClassSession().getStartAt().isBefore(end) &&
-                                b.getClassSession().getEndAt().isAfter(start)
-                );
+                .anyMatch(b -> b.getClassSession().getStartAt().isBefore(end) &&
+                        b.getClassSession().getEndAt().isAfter(start));
         if (conflict) {
             throw new ResponseStatusException(HttpStatus.CONFLICT, "time_conflict");
         }
@@ -108,9 +109,12 @@ public class BookingService {
      *
      * @param classId auðkenni tíma sem á að skrá á biðlista fyrir
      * @param session núverandi HTTP session sem inniheldur innskráðan notanda
-     * @return hlekkur {@link BookingResponse} sem inniheldur upplýsingar um biðlista
-     * @throws ResponseStatusException með status 404 ef tími eða notandi finnst ekki
-     * @throws ResponseStatusException með status 409 ef notandi hefur nú þegar bókað eða tíminn er ekki fullur
+     * @return hlekkur {@link BookingResponse} sem inniheldur upplýsingar um
+     *         biðlista
+     * @throws ResponseStatusException með status 404 ef tími eða notandi finnst
+     *                                 ekki
+     * @throws ResponseStatusException með status 409 ef notandi hefur nú þegar
+     *                                 bókað eða tíminn er ekki fullur
      */
     @Transactional
     public BookingResponse joinWaitlist(Long classId, HttpSession session) {
@@ -153,9 +157,10 @@ public class BookingService {
     /**
      * UC2 - afbóka tíma (og hækka af biðlista ef sæti losnar)
      *
-     * @param userId auðkenni notanda sem ætlar sér að afbóka
+     * @param userId  auðkenni notanda sem ætlar sér að afbóka
      * @param classId auðkenni tímans sem notandi ætlar sér að afbóka
-     * @throws ResponseStatusException með status 404 ef engin bókun á gefnum tíma finnst fyrir gefin notanda
+     * @throws ResponseStatusException með status 404 ef engin bókun á gefnum tíma
+     *                                 finnst fyrir gefin notanda
      * @throws ResponseStatusException með status 409 ef það er of seint að afbóka
      */
     @Transactional
@@ -184,12 +189,12 @@ public class BookingService {
     @Transactional
     public void deleteOwned(Long uid, Long bookingId) {
         Booking b = bookingRepo.findById(bookingId)
-            .orElseThrow(() -> new org.springframework.web.server.ResponseStatusException(
-                org.springframework.http.HttpStatus.NOT_FOUND, "not_found"));
+                .orElseThrow(() -> new org.springframework.web.server.ResponseStatusException(
+                        org.springframework.http.HttpStatus.NOT_FOUND, "not_found"));
 
         if (!b.getUser().getId().equals(uid)) {
             throw new org.springframework.web.server.ResponseStatusException(
-                org.springframework.http.HttpStatus.FORBIDDEN, "forbidden");
+                    org.springframework.http.HttpStatus.FORBIDDEN, "forbidden");
         }
         bookingRepo.deleteById(bookingId);
     }
