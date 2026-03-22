@@ -84,13 +84,16 @@ public class UserBookingsController {
         Page<Booking> pageResult = bookings.findByUserIdAndClassSessionStartAtBetween(userId, fromInst, toInst,
                 pageable);
 
-        List<BookingResponse> items = pageResult.getContent().stream().map(b -> new BookingResponse(
+        List<BookingResponse> items = pageResult.getContent().stream().map(b ->
+            new BookingResponse(
                 b.getId(),
                 b.getClassSession().getId(),
                 b.getClassSession().getType(),
                 b.getClassSession().getStartAt(),
                 b.getClassSession().getEndAt(),
-                b.getStatus())).toList();
+                b.getStatus()
+            )
+        ).toList();
 
         return new PagedResponse<>(
                 items,

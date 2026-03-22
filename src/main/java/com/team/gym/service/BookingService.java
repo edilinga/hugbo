@@ -24,8 +24,8 @@ public class BookingService {
     private final UserRepository userRepo;
 
     public BookingService(BookingRepository bookingRepo,
-            ClassSessionRepository classRepo,
-            UserRepository userRepo) {
+                          ClassSessionRepository classRepo,
+                          UserRepository userRepo) {
         this.bookingRepo = bookingRepo;
         this.classRepo = classRepo;
         this.userRepo = userRepo;
@@ -100,7 +100,8 @@ public class BookingService {
                 cs.getType(),
                 cs.getStartAt(),
                 cs.getEndAt(),
-                saved.getStatus());
+                saved.getStatus()
+        );
     }
 
     /**
@@ -149,7 +150,8 @@ public class BookingService {
                 cs.getType(),
                 cs.getStartAt(),
                 cs.getEndAt(),
-                saved.getStatus());
+                saved.getStatus()
+        );
     }
 
     /**
