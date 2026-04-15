@@ -29,17 +29,21 @@ public class User {
     @Column(nullable = false)
     private Instant createdAt = Instant.now();
 
+    @Column(name = "profile_image_key")
+    private String profileImageKey;
+
     public Long getId() { return id; }
     public String getSsn() { return ssn; }
     public String getEmail() { return email; }
     public String getPassword() { return password; }
     public Instant getCreatedAt() { return createdAt; }
+    public String getProfileImageKey() { return profileImageKey; }
 
     public void setId(Long id) { this.id = id; }
     public void setSsn(String ssn) { this.ssn = ssn; }
     public void setEmail(String email) { this.email = email; }
     public void setPassword(String password) { this.password = password; }
     public void setCreatedAt(Instant createdAt) { this.createdAt = createdAt; }
-    
+    public void setProfileImageKey(String profileImageKey) { this.profileImageKey = profileImageKey; }
 
 }

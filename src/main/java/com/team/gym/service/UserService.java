@@ -7,6 +7,7 @@ import com.team.gym.repository.UserRepository;
 import org.springframework.stereotype.Service;
 
 import org.springframework.transaction.annotation.Transactional;
+import org.springframework.web.multipart.MultipartFile;
 import org.springframework.web.server.ResponseStatusException;
 import org.springframework.http.HttpStatus;
 import com.team.gym.repository.BookingRepository;
@@ -15,9 +16,12 @@ import com.team.gym.repository.BookingRepository;
 public class UserService {
     private final UserRepository repo;
     private final BookingRepository bookings;
+    private final ProfileImageService profileImageService;
 
-    public UserService(UserRepository repo, BookingRepository bookings){
-        this.repo = repo; this.bookings = bookings;
+    public UserService(UserRepository repo, BookingRepository bookings, ProfileImageService profileImageService) {
+        this.repo = repo;
+        this.bookings = bookings;
+        this.profileImageService = profileImageService;
     }
 
     /**
@@ -82,6 +86,24 @@ public class UserService {
         u.setSsn(req.ssn());
         u.setPassword(req.password());
         return repo.save(u);
+    }
+
+    public User uploadProfileImage(Long userId, MultipartFile file) {
+        User user = repo.findById(userId)
+                .orElseThrow(() -> new IllegalArgumentException("not_found"));
+
+        String oldKey = user.getProfileImageKey();
+
+        String newKey = profileImageService.uploadUserProfileImage(userId, file);
+
+        user.setProfileImageKey(newKey);
+        User saved = repo.save(user);
+
+        if (oldKey != null) {
+            profileImageService.delete(oldKey);
+        }
+
+        return saved;
     }
 
     /**
