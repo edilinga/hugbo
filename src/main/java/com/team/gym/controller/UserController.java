@@ -24,6 +24,9 @@ public class UserController {
     @Value("${cloudflare.r2.bucket}")
     private String bucket;
 
+    @Value("${cloudflare.r2.public-url}")
+    private String publicUrl;
+
     public UserController(UserService users){ this.users = users; }
 
     /**
@@ -171,15 +174,14 @@ public class UserController {
     }
 
     private String buildProfileImageUrl(User user) {
-        if (user.getProfileImageKey() != null && !user.getProfileImageKey().isBlank()) {
-            return "https://" + bucket + "." + accountId + ".r2.dev/"
-                    + user.getProfileImageKey();
+        if (user.getProfileImageKey() == null || user.getProfileImageKey().isBlank()) {
+            // fallback avatar
+            return "https://ui-avatars.com/api/?name="
+                    + user.getEmail()
+                    + "&background=random&color=fff&size=256";
         }
 
-        // fallback avatar
-        return "https://ui-avatars.com/api/?name="
-                + user.getEmail()
-                + "&background=random&color=fff&size=256";
+        return publicUrl + "/" + user.getProfileImageKey();
     }
 
 }
