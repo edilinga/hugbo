@@ -38,28 +38,29 @@ public class ProfileImageService {
         validate(file);
 
         String extension = getExtension(file.getContentType());
-        String objectKey = "profile-images/" + userId + "/" + UUID.randomUUID() + extension;
+
+        String objectKey = "profile-images/"
+                + userId + "/"
+                + UUID.randomUUID() + extension;
 
         try {
-            byte[] bytes = file.getBytes();
-
             PutObjectRequest request = PutObjectRequest.builder()
                     .bucket(bucket)
                     .key(objectKey)
                     .contentType(file.getContentType())
-                    .contentLength((long) bytes.length)
+                    .contentLength(file.getSize())
                     .build();
 
             s3Client.putObject(
                     request,
-                    RequestBody.fromBytes(bytes)
+                    RequestBody.fromInputStream(file.getInputStream(), file.getSize())
             );
 
-            return objectKey;
-
         } catch (IOException e) {
-            throw new RuntimeException("upload_failed", e);
+            throw new RuntimeException("upload_failed");
         }
+
+        return objectKey;
     }
 
     public void delete(String objectKey) {
