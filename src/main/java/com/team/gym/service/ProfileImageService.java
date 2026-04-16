@@ -84,9 +84,11 @@ public class ProfileImageService {
         }
 
         String type = file.getContentType();
+        /*
         if (type == null || !ALLOWED_TYPES.contains(type)) {
             throw new IllegalArgumentException("invalid_file_type");
         }
+        */
     }
 
     private String getExtension(String contentType) {
