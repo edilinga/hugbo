@@ -36,7 +36,7 @@ public class ProfileImageService {
     }
 
     public String uploadUserProfileImage(Long userId, MultipartFile file) {
-        validate(file);
+        // validate(file);
 
         String extension = getExtension(file.getContentType());
 
