@@ -96,7 +96,8 @@ public class ProfileImageService {
             case "image/jpeg" -> ".jpg";
             case "image/png" -> ".png";
             case "image/webp" -> ".webp";
-            default -> throw new IllegalArgumentException("unsupported_type");
+            default -> ".png";
+            // default -> throw new IllegalArgumentException("unsupported_type");
         };
     }
 }
