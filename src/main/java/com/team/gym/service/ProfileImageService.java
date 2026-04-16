@@ -23,7 +23,8 @@ public class ProfileImageService {
     private static final List<String> ALLOWED_TYPES = List.of(
             "image/jpeg",
             "image/png",
-            "image/webp"
+            "image/webp",
+            "image/*" // temp whitelist type for testing
     );
 
     public ProfileImageService(
